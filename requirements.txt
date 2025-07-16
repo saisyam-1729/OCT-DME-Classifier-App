@@ -1,4 +1,7 @@
 streamlit
 ultralytics
-torch
 Pillow
+torch
+gspread
+google-api-python-client
+google-auth

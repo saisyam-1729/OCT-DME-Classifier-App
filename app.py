@@ -1,69 +1,92 @@
 import streamlit as st
+import os
 from PIL import Image
 from ultralytics import YOLO
+from gdrive_utils import (
+    init_google_clients,
+    save_feedback_image,
+    log_feedback_to_sheet
+)
 
-# -------------------------------
-# Constants
-# -------------------------------
-MODEL_PATH = "OCT_DME_CLASSIFICATION_APP\best.pt"
-CLASS_NAMES = ["Normal", "CME", "DRT", "SRD"]
-right_OCT_coords = (100, 675, 420, 910)
-left_OCT_coords = (450, 675, 770, 910)
+# Step 1: Recreate temp_secret.json
+service_account_json = os.getenv("Google_Service_Account")
+if service_account_json:
+    with open("temp_secret.json", "w") as f:
+        f.write(service_account_json)
+else:
+    st.error("❌ GOOGLE_SERVICE_ACCOUNT secret not found. Please set it in your Space settings.")
+    st.stop()
 
-# -------------------------------
-# Load Model with Caching
-# -------------------------------
+# Step 2: Load YOLOv8 model
+MODEL_PATH = "./best.pt"
 @st.cache_resource
 def load_model():
-    model = YOLO(MODEL_PATH)
-    return model
+    return YOLO(MODEL_PATH)
+model = load_model()
 
-# -------------------------------
-# Inference Function
-# -------------------------------
-def predict(model, pil_img):
-    results = model(pil_img, verbose=False)
-    probs = results[0].probs
-    class_id = int(probs.top1)
-    confidence = float(probs.top1conf)
-    return CLASS_NAMES[class_id], confidence
+# Step 3: Initialize Google Sheets client
+sheet_client = init_google_clients()
 
-# -------------------------------
-# Streamlit UI
-# -------------------------------
-st.set_page_config(page_title="OCT Eye Disease Classifier", layout="centered")
-st.title("🧠 OCT Eye Disease Classifier")
-st.write("Upload an OCT image, and this app will classify the **right and left eyes** using a YOLOv8 model.")
+# Step 4: UI - User Input
+st.title("👁️ OCT DME Classifier")
+username = st.text_input("Enter your name:")
+image_file = st.file_uploader("Upload OCT image", type=["jpg", "png", "jpeg"])
 
-# File uploader
-uploaded_file = st.file_uploader("📤 Upload OCT Image", type=["jpg", "jpeg", "png"])
+if image_file and username:
+    image = Image.open(image_file).convert("RGB")
+    input_label = image_file.name
+    st.image(image, caption="Uploaded Image", use_column_width=True)
 
-if uploaded_file:
-    image = Image.open(uploaded_file).convert("RGB")
-    st.image(image, caption="Uploaded OCT Image", use_column_width=True)
-
-    # Crop right and left eyes
-    right_eye = image.crop(right_OCT_coords)
-    left_eye = image.crop(left_OCT_coords)
-
-    # Display cropped images
-    st.subheader("👁️ Extracted Eye Regions")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.image(right_eye, caption="Right Eye", use_column_width=True)
-    with col2:
-        st.image(left_eye, caption="Left Eye", use_column_width=True)
-
-    # Load model and predict
-    model = load_model()
+    # Coordinates
+    right_coords = (100, 675, 420, 910)
+    left_coords = (450, 675, 770, 910)
+    right_eye = image.crop(right_coords)
+    left_eye = image.crop(left_coords)
 
     st.subheader("🔍 Model Predictions")
+    preds_right = model.predict(right_eye, imgsz=640)[0]
+    preds_left = model.predict(left_eye, imgsz=640)[0]
 
-    with st.spinner("Running model on Right Eye..."):
-        right_label, right_conf = predict(model, right_eye)
-        st.success(f"🟦 Right Eye: **{right_label}** (Confidence: {right_conf:.2f})")
+    right_label = preds_right.names[int(preds_right.probs.top1)]
+    left_label = preds_left.names[int(preds_left.probs.top1)]
 
-    with st.spinner("Running model on Left Eye..."):
-        left_label, left_conf = predict(model, left_eye)
-        st.success(f"🟥 Left Eye: **{left_label}** (Confidence: {left_conf:.2f})")
+    st.write(f"**Right Eye:** {right_label}")
+    st.write(f"**Left Eye:** {left_label}")
 
+    # Step 5: Feedback
+    st.subheader("📝 Feedback")
+    agree_right = st.radio("Do you agree with the prediction for Right Eye?", ["Yes", "No"], key="right")
+    agree_left = st.radio("Do you agree with the prediction for Left Eye?", ["Yes", "No"], key="left")
+
+    right_correct = None
+    left_correct = None
+
+    options = ["CME", "DRT", "NORMAL", "SRD"]
+    count = 1
+
+    if agree_right == "No":
+        right_correct = st.selectbox("What should be the correct class for Right Eye?", options, key="correct_r")
+        filename = f"{username}-{right_correct}_{str(count).zfill(5)}.png"
+        save_feedback_image(right_eye, filename)
+        count += 1
+
+    if agree_left == "No":
+        left_correct = st.selectbox("What should be the correct class for Left Eye?", options, key="correct_l")
+        filename = f"{username}-{left_correct}_{str(count).zfill(5)}.png"
+        save_feedback_image(left_eye, filename)
+        count += 1
+
+    # Submit feedback
+    if st.button("Submit Feedback"):
+        log_feedback_to_sheet(
+            sheet_client,
+            username,
+            input_label,
+            right_label,
+            left_label,
+            agree_right,
+            agree_left,
+            right_correct,
+            left_correct
+        )
+        st.success("✅ Feedback submitted successfully!")
