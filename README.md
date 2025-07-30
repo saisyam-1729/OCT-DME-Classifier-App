@@ -29,28 +29,29 @@ Follow these steps:
 ### 1️⃣ Enter Your Name  
 Your name will be stored as part of the session for logging purposes.
 
-![User Logs](OCT_DME_CLASSIFICATION_APP/User_Log_in.png)
+![User Logs](assets/User_Log_in.png)
 
 ---
 
 ### 2️⃣ Upload Patient OCT Report  
 Only standard OCT images are supported. A sample is shown below.
 
-![Patient Image](OCT_DME_CLASSIFICATION_APP/Patient_DME_Report.jpg)
+![Image Upload](assets/PatientReportUpload.png)
+
+![Report Upload](assets/Patient_DME_Report.jpg)
 
 ---
 
 ### 3️⃣ Wait for Classification  
 The system will classify **left** and **right** eye images into appropriate DME categories.
 
-![Classification](OCT_DME_CLASSIFICATION_APP/PatientReportUpload.png)
 
 ---
 
 ### 4️⃣ Submit Feedback  
 You can agree or disagree with the system's predictions for each eye.
 
-![User Feedback](OCT_DME_CLASSIFICATION_APP/UserFeedback.png)
+![User Feedback](assets/UserFeedback.png)
 
 ---
 
