@@ -10,7 +10,7 @@ Diabetic Macular Edema (DME) is one of the leading causes of vision loss among d
 
 This app aims to:
 
-- **Automate** the classification of OCT reports into categories: CME, DRT, SRD, TPHM, NOR, and TRD.
+- **Automate** the classification of OCT reports into categories: CME, DRT, SRD, NOR.
 - **Engage users** (e.g., ophthalmologists or technicians) by allowing feedback on predictions.
 - **Store user and prediction data** for continual system improvement.
 
@@ -18,11 +18,14 @@ This app aims to:
 
 ## 🧠 How it Works
 
-This application is powered by a **YOLOv8n-based image classification model** fine-tuned on multiple DME categories. It's built using **Streamlit** for the frontend and **Python** for backend processing and logging.
+This application is powered by a **YOLOv11-based image classification model** fine-tuned on multiple DME categories. It's built using **Streamlit** for the frontend and **Python** for backend processing and logging.
 
 ---
 
-## 🧪 Try it Out!
+## 🧪 Try it Out! 
+
+## Here is the link for accessing the app
+https://huggingface.co/spaces/saisyam1729/oct-dme-classifier
 
 Follow these steps:
 
@@ -101,6 +104,9 @@ This project is distributed under an **Other** license — please refer to the r
 ## 🙋‍♂️ About the Author
 
 Made with ❤️ by Sai Syam — feel free to reach out or contribute to the project!
+
+☎️Phone: +91 7702161829
+✉️email: psaisyam@gmail.com
 
 ---
 
