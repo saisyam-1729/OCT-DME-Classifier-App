@@ -29,16 +29,16 @@ Follow these steps:
 ### 1️⃣ Enter Your Name  
 Your name will be stored as part of the session for logging purposes.
 
-![User Logs](assets/User_Log_in.png)
+![User Logs](Assets/User_Log_in.png)
 
 ---
 
 ### 2️⃣ Upload Patient OCT Report  
 Only standard OCT images are supported. A sample is shown below.
 
-![Image Upload](assets/PatientReportUpload.png)
+![Image Upload](Assets/PatientReportUpload.png)
 
-![Report Upload](assets/Patient_DME_Report.jpg)
+![Report Upload](Assets/Patient_DME_Report.jpg)
 
 ---
 
@@ -51,7 +51,7 @@ The system will classify **left** and **right** eye images into appropriate DME 
 ### 4️⃣ Submit Feedback  
 You can agree or disagree with the system's predictions for each eye.
 
-![User Feedback](assets/UserFeedback.png)
+![User Feedback](Assets/UserFeedback.png)
 
 ---
 
